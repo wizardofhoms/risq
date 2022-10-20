@@ -1,0 +1,16 @@
+name: risq 
+help: RISK AppVM client 
+version: 0.1.0
+
+dependencies:
+  - qvm-pass
+
+commands:
+  - name: pass 
+    help: "Use the password-store in vault"
+    args:
+      - name: command
+        help: "Pass command to use"
+      - name: arguments
+        help: "Arguments to give to pass program"
+        repeatable: true
