@@ -8,9 +8,7 @@ dependencies:
 commands:
   - name: pass 
     help: "Use the password-store in vault"
+    catch_all: true
     args:
       - name: command
         help: "Pass command to use"
-      - name: arguments
-        help: "Arguments to give to pass program"
-        repeatable: true
