@@ -1,20 +1,16 @@
 #!/usr/bin/env zsh
 
-# :command.master_script
-
-# :command.version_command
 version_command() {
   echo "$version"
 }
 
-# :command.usage
 risq_usage() {
   if [[ -n $long_usage ]]; then
-    printf "risq - RISK AppVM client\n"
+    printf "risq - RISKS AppVM client (wrapper around pseudo pass/tomb utils)\n"
     echo
 
   else
-    printf "risq - RISK AppVM client\n"
+    printf "risq - RISKS AppVM client (wrapper around pseudo pass/tomb utils)\n"
     echo
 
   fi
@@ -24,16 +20,14 @@ risq_usage() {
   printf "  risq [command] --help | -h\n"
   printf "  risq --version | -v\n"
   echo
-  # :command.usage_commands
+
   printf "Commands:\n"
   echo "  pass   Use the password-store in vault"
   echo
 
-  # :command.long_usage
   if [[ -n $long_usage ]]; then
     printf "Options:\n"
 
-    # :command.usage_fixed_flags
     echo "  --help, -h"
     printf "    Show this help\n"
     echo
@@ -44,7 +38,6 @@ risq_usage() {
   fi
 }
 
-# :command.usage
 risq_pass_usage() {
   if [[ -n $long_usage ]]; then
     printf "risq pass - Use the password-store in vault\n"
@@ -61,27 +54,25 @@ risq_pass_usage() {
   printf "  risq pass --help | -h\n"
   echo
 
-  # :command.long_usage
   if [[ -n $long_usage ]]; then
     printf "Options:\n"
 
-    # :command.usage_fixed_flags
     echo "  --help, -h"
     printf "    Show this help\n"
     echo
 
-    # :command.usage_args
     printf "Arguments:\n"
 
-    # :argument.usage
     echo "  COMMAND"
     printf "    Pass command to use\n"
+    echo
+
+    printf "A Qubes-RPC inter-vm client for the pass password manager.\n\npositional arguments:\n  {mv,cp,init,rm,get-or-generate,show,ls,list,generate,insert}\n                        sub-command help (run subcommand with --help as first parameter)\n    mv                  renames / moves a key in the store\n    cp                  renames / copies a key in the store to a new location\n    init                initializes a new pass store if none exists\n    rm                  removes a key in the store\n    get-or-generate     retrieves a key from the password store, generating one if it does not exist\n    show                shows existing password\n    ls (list)           lists passwords\n    generate            generates a key in the password store\n    insert              inserts a new key into the pass store\n\noptional arguments:\n  -h, --help            show this help message and exit\n  -d DEST_VM, --dest-vm DEST_VM\n                        Set the Qubes domain to operate with.\n\n"
     echo
 
   fi
 }
 
-# :command.normalize_input
 normalize_input() {
   local arg flags
 
@@ -105,7 +96,7 @@ normalize_input() {
     shift
   done
 }
-# :command.inspect_args
+
 inspect_args() {
   readarray -t sorted_keys < <(printf '%s\n' "${!args[@]}" | sort)
   if (( ${#args[@]} )); then
@@ -125,8 +116,6 @@ inspect_args() {
   fi
 }
 
-# :command.user_lib
-# src/lib/config.sh
 config_init() {
     RISQ_CONFIG_FILE=${RISQ_CONFIG_FILE-${RISQ_DIR}/config.ini}
     [[ -f "$RISQ_CONFIG_FILE" ]] || {
@@ -248,8 +237,6 @@ config_keys() {
 config_has_key() {
     [[ $(config_get "$1") ]]
 }
-
-# src/lib/log.sh
 
 
 # Section is set either by functions or simple calls,
@@ -409,8 +396,6 @@ function _print() {
     return 0
 }
 
-# src/lib/pass.sh
-
 # Ask the vault to show the ouput of a password
 pass_show ()
 {
@@ -441,8 +426,6 @@ pass_show_once ()
     echo "Local clipboard will be erased after 1 use"
 }
 
-# src/lib/utils.sh
-
 # Return 0 if is set, 1 otherwise
 option_is_set() {
     local -i r	 # the return code (0 = set, 1 = unset)
@@ -457,14 +440,11 @@ option_is_set() {
     return $r;
 }
 
-# :command.command_functions
-# :command.function
 risq_pass_command() {
-  # src/pass_command.sh
 
   local command arguments
   command="${args[command]}"
-  arguments=( "${other_args[*]}" )
+  arguments=( "${other_args[@]}" )
 
   case "${command}" in
       (show) pass_show_once "${arguments[@]}" ;;
@@ -473,9 +453,8 @@ risq_pass_command() {
 
 }
 
-# :command.parse_requirements
 parse_requirements() {
-  # :command.fixed_flags_filter
+
   case "${1:-}" in
   --version | -v )
     version_command
@@ -490,13 +469,11 @@ parse_requirements() {
 
   esac
 
-  # :command.dependencies_filter
   if ! [[ -x "$(command -v qvm-pass)" ]]; then
     printf "missing dependency: qvm-pass\n"
     exit 1
   fi
 
-  # :command.command_filter
   action=${1:-}
 
   case $action in
@@ -510,7 +487,6 @@ parse_requirements() {
     shift $#
     ;;
 
-  # :command.command_fallback
   "" )
     risq_usage
     exit 1
@@ -523,7 +499,6 @@ parse_requirements() {
 
   esac
 
-  # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
@@ -534,8 +509,7 @@ parse_requirements() {
       ;;
 
     * )
-      # :command.parse_requirements_case
-      # :command.parse_requirements_case_simple
+
       printf "invalid argument: %s\n" "$key"
       exit 1
 
@@ -546,9 +520,8 @@ parse_requirements() {
 
 }
 
-# :command.parse_requirements
 risq_pass_parse_requirements() {
-  # :command.fixed_flags_filter
+
   case "${1:-}" in
   --help | -h )
     long_usage=yes
@@ -558,10 +531,8 @@ risq_pass_parse_requirements() {
 
   esac
 
-  # :command.command_filter
   action="pass"
 
-  # :command.parse_requirements_while
   while [[ $# -gt 0 ]]; do
     key="$1"
     case "$key" in
@@ -572,8 +543,7 @@ risq_pass_parse_requirements() {
       ;;
 
     * )
-      # :command.parse_requirements_case
-      # :command.parse_requirements_case_catch_all
+
       if [[ -z ${args[command]+x} ]]; then
 
         args[command]=$1
@@ -590,13 +560,10 @@ risq_pass_parse_requirements() {
 
 }
 
-# :command.initialize
 initialize() {
   version="0.1.0"
   long_usage=''
   
-
-  # src/initialize.sh
 
   # Connected terminal
   typeset -H _TTY
@@ -638,7 +605,6 @@ initialize() {
 
 }
 
-# :command.run
 run() {
   declare -A args=()
   declare -a other_args=()

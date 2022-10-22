@@ -23,8 +23,6 @@ _risq() {
         else
                 local -a subcmds
                 subcmds=(
-                        'open:Open tomb'
-                        'close:Close tomb'
                         'pass:Use pass commands'
                 )
 

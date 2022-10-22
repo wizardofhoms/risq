@@ -1,5 +1,5 @@
 name: risq 
-help: RISK AppVM client 
+help: RISKS AppVM client (wrapper around pseudo pass/tomb utils)
 version: 0.1.0
 
 dependencies:
@@ -12,3 +12,24 @@ commands:
     args:
       - name: command
         help: "Pass command to use"
+    footer: |
+      A Qubes-RPC inter-vm client for the pass password manager.
+
+      positional arguments:
+        {mv,cp,init,rm,get-or-generate,show,ls,list,generate,insert}
+                              sub-command help (run subcommand with --help as first parameter)
+          mv                  renames / moves a key in the store
+          cp                  renames / copies a key in the store to a new location
+          init                initializes a new pass store if none exists
+          rm                  removes a key in the store
+          get-or-generate     retrieves a key from the password store, generating one if it does not exist
+          show                shows existing password
+          ls (list)           lists passwords
+          generate            generates a key in the password store
+          insert              inserts a new key into the pass store
+
+      optional arguments:
+        -h, --help            show this help message and exit
+        -d DEST_VM, --dest-vm DEST_VM
+                              Set the Qubes domain to operate with.
+
