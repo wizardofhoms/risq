@@ -4,6 +4,8 @@ version: 0.1.0
 
 dependencies:
   - qvm-pass
+  - qubes-gpg-client-wrapper
+  - qubes-gpg-import-key
 
 commands:
   - name: pass 
@@ -33,3 +35,17 @@ commands:
         -d DEST_VM, --dest-vm DEST_VM
                               Set the Qubes domain to operate with.
 
+  - name: verify
+    help: "Verify an onion link signature"
+    args:
+      - name: onion
+        help: "onion link to verify (any path component will be removed)"
+        validate: onion_v3
+        required: true
+    flags:
+      - long: --key
+        short: -k
+        help: "Optional public key file to import in keyring, to check the link against"
+      - long: --verbose
+        short: -v
+        help: "Show verbose logging"

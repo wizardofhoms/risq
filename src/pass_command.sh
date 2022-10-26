@@ -1,5 +1,6 @@
 
 local command arguments
+
 command="${args[command]}"
 arguments=( "${other_args[@]}" )
 

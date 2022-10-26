@@ -2,35 +2,60 @@
 #autoload
 
 _risq() {
-        local cmd
-        if (( CURRENT > 2 )); then
-                cmd=${words[2]}
-                # Set the context for the subcommand
-                curcontext="${curcontext%:*:*}:risq-$cmd"
-                # Narrow the range of words we are looking at to exclude `pass`
-                (( CURRENT-- ))
-                shift words
-                # Run the completion for the subcommand
-                case "${cmd}" in
-                        # Tomb
-                        open|close)
-                                _list 
-                                ;;
-                        pass)
-                                _normal -p $service
-                                ;;
-                esac
-        else
-                local -a subcmds
-                subcmds=(
-                        'pass:Use pass commands'
-                )
+    local cmd
+    if (( CURRENT > 2 )); then
+        cmd=${words[2]}
+        # Set the context for the subcommand
+        curcontext="${curcontext%:*:*}:risq-$cmd"
+        # Narrow the range of words we are looking at to exclude `pass`
+        (( CURRENT-- ))
+        shift words
+        # Run the completion for the subcommand
+        case "${cmd}" in
+            # Tomb
+            pass)       _normal -p $service ;;
+            verify)     _verify ;;
+        esac
+    else
+        local -a subcmds
+        subcmds=(
+            'pass:Use pass commands'
+            'verify:Verify an onion link signature'
+        )
 
-                _describe -t commands 'commands' subcmds
-        fi
+        _describe -t commands 'commands' subcmds
+    fi
 }
+
+# Subcomands ==================================================================================
+
+# Completion dispatcher for verify command
+_verify ()
+{
+    local ret=1
+    local line state
+
+    _arguments -C \
+        "${_flags_base[@]}" \
+        "${_flags_verify[@]}" \
+        "1:onion v3 URL:" \
+        && ret=0
+}
+
+# Flags =======================================================================================
+
+# Flags that are present on all commands
+_flags_base=(
+    '(-v --verbose)'{-v,--verbose}'[Enable verbose logging]'
+    '(- : *)'{-h,--help}'[Print help for the command]'
+    )
+
+_flags_verify=(
+    '(-k --key)'{-k,--key}'[Optional public key file to import in keyring, to check the link against]:GPG public key file:_path_files'
+    )
+
 
 # don't run the completion function when being source-ed or eval-ed
 if [ "$funcstack[1]" = "_risq" ]; then
-        _risq
+    _risq
 fi
