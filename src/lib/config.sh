@@ -31,6 +31,12 @@ GRAVEYARD=/home/user/.graveyard
 ; Default timeout after which the clipboard is wiped after being filled with passphrase.
 PASS_TIMEOUT=45
 
+; Tor.taxi onion link is used as an additional source for verifying onion signatures.
+TOR_TAXI_ONION=http://tortaxi7axhn2fv4j475a6blv7vwjtpieokolfnojwvkhsnj7sgctkqd.onion
+
+; DarketLive onion link is used as an additional source for verifying onion signatures.
+DARKNET_LIVE_ONION=http://darkzzx4avcsuofgfez5zq75cqc4mprjvfqywo45dfcaxrwqg6qrlfid.onion
+
 EOF
     }
 }
