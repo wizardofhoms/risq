@@ -7,6 +7,11 @@ dependencies:
   - qubes-gpg-client-wrapper
   - qubes-gpg-import-key
 
+flags:
+  - long: --verbose
+    short: -v
+    help: "Show verbose logging"
+
 commands:
   - name: pass 
     help: "Use the password-store in vault"
@@ -46,6 +51,10 @@ commands:
       - long: --key
         short: -k
         help: "Optional public key file to import in keyring, to check the link against"
-      - long: --verbose
-        short: -v
-        help: "Show verbose logging"
+
+  - name: help
+    help: Show help about a command
+    args:
+    - name: command
+      help: Help subject
+

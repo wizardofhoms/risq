@@ -202,6 +202,12 @@ GRAVEYARD=/home/user/.graveyard
 ; Default timeout after which the clipboard is wiped after being filled with passphrase.
 PASS_TIMEOUT=45
 
+; Tor.taxi onion link is used as an additional source for verifying onion signatures.
+TOR_TAXI_ONION=http://tortaxi7axhn2fv4j475a6blv7vwjtpieokolfnojwvkhsnj7sgctkqd.onion
+
+; DarketLive onion link is used as an additional source for verifying onion signatures.
+DARKNET_LIVE_ONION=http://darkzzx4avcsuofgfez5zq75cqc4mprjvfqywo45dfcaxrwqg6qrlfid.onion
+
 EOF
     }
 }
@@ -646,25 +652,43 @@ risq_verify_command() {
 
   # 1 - Get the GPG public key associated to this onion. =================================================
   # * Either ghlkgfjlf.onion/pgp.txt
-  # * Or fetched from another site
   # * Or specified with --key flag
   # * Or we might already have a key in our keyring for this: either fallback to this or check if we have one.
   _message "Fetching GPG public keys"
-
-  # If we need to fetch the GPG key on the site itself
   _run torify wget "${host}/pgp.txt"
+  [[ $? ]] || _warning "Failed to fetch onion/gpg.txt"
 
-  # 2 - Get the signature file for this onion (generally mirrors.txt) =================================================
+  # 2 - Get the signature file for this onion (generally mirrors.txt) ====================================
   # In this signature file we must:
   # - Find all onion links.
   # - Find that one of those links matches the link we passed as argument.
   _message "Fetching signature file and ensuring URL match"
+  _run torify wget "${host}/mirrors.txt"
+  [[ $? ]] || _warning "Failed to fetch onion/mirrors.txt"
 
-  # 3 - Import the GPG public key in our vault keyring =================================================
+  # 3 - Try to locate relevant data on tor.taxi ==========================================================
+
+  # - Get the contents of "sitenames"
+  # - Grep a line with the name of the site
+  # - Get the last part of this line, containing the corresponding URL path
+  # - Append path to tor.taxi onion
+  # - Fetch the corresponding mirrors.txt file
+  # - Grep everything between BEGIN_PGP_SIGNED_MESSAGE and ENG_PGP_SIGNATURE
+  # - Compare with the one we have fetched on the site itself.
+
+  # Also, check /avoid websites to see if it matches
+
+  # 3bis - Try to locate relevant data on DarknetLive ====================================================
+
+  # 4 - Import the GPG public key in our vault keyring ===================================================
   _message "Importing GPG public key in keyring"
 
-  # 4 - Check the signature file against the newly imported key. =================================================
+  # 5 - Check the signature file against the newly imported key. =========================================
   _message "Verifying signatures match"
+  # qubes-gpg-import-key
+
+  # Clean up tmp dir
+  cd && _run shred -u "$tmp"
 
   # 5 - At this point, in all likelihood our site is legit
   _success "Onion URL verified against GPG key"
@@ -918,6 +942,11 @@ initialize() {
   typeset -gr HUSH_DIR="$(config_get HUSH_DIR)"
   typeset -gr GRAVEYARD="$(config_get GRAVEYARD)"
   typeset -gH PASS_TIMEOUT=$(config_get PASS_TIMEOUT)
+
+  # Other constants ----------------------------------------------------------------------------------
+
+  typeset -gr TOR_TAXI_ONION=$(config_get TOR_TAXI_ONION)
+  typeset -gr DARKNET_LIVE_ONION=$(config_get DARKNET_LIVE_ONION)
 
 }
 
