@@ -88,21 +88,3 @@ check_onion_mirrors ()
 
     _success "Onion found in mirrors.txt file"
 }
-
-# get_onion_tortaxi fetches tortaxi data for the onion if available.
-get_onion_tortaxi ()
-{
-    local onion="${1}"
-
-    [[ ! -e "${RISQ_DIR}/tortaxi_sitenames" ]] && return
-
-    # - Grep a line with the name of the site
-    grep "${onion}" < "${RISQ_DIR}/tortaxi_sitenames" \
-        _info "No website data on Tor Taxi index"
-
-    # - Get the last part of this line, containing the corresponding URL path
-    # - Append path to tor.taxi onion
-    # - Fetch the corresponding mirrors.txt file
-    # - Grep everything between BEGIN_PGP_SIGNED_info and ENG_PGP_SIGNATURE
-    # - Compare with the one we have fetched on the site itself.
-}

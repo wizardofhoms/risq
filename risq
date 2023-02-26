@@ -419,11 +419,36 @@ config_has_key() {
 
 # Section is set either by functions or simple calls,
 # so that logging can inform on the component working.
-section='risks'
+section='risq'
 
 # When multiple sections are used within a single risks
 # operation, we padd them, for clearer/better aesthetics.
 section_padding=0
+
+# Last log level used. Inline logging uses this.
+last_level="message"
+
+# maps levels to their display color
+declare -A log_colors
+log_colors=(
+    [verbose]="blue"
+    [message]="white"
+    [warning]="yellow"
+    [success]="green"
+    [failure]="red"
+)
+
+# maps levels to notice characters.
+declare -A log_chars
+log_chars=(
+    [inline]=" > "
+    [verbose]="[D]"
+    [message]=" . "
+    [warning]="[W]"
+    [success]="(*)"
+    [failure]="[E]"
+)
+
 
 # Simple way of setting the section and to update the padding
 _in_section ()
@@ -433,7 +458,6 @@ _in_section ()
         section_padding="$2"
     fi
 }
-
 
 function is_verbose_set () {
     if [[ "${args['--verbose']}" -eq 1 ]]; then
@@ -453,7 +477,7 @@ function _msg()
     if [[ ${#@} -lt 3 ]]; then
         local progname="$section"
         if [[ -z "$progname" ]]; then
-            progname='risks'
+            progname='risq'
         fi
         local msg="$2"
     else
@@ -471,41 +495,34 @@ function _msg()
     # 	msg=${(S)msg//::$(($i - 2))*::/$*[$i]}
     # done
 
+    # Apply log chars & color
+    local pcolor=${log_colors[$1]}
+    local pchars=${log_chars[$1]}
+
+    # Use the display of last message when inline
+    [[ "$1" == "inline" ]] && { pcolor=${log_colors[$last_level]}; pchars=${log_chars[inline]} }
+    last_level="$1"
+
     local command="print -P"
-    local pchars=""
-    local pcolor="normal"
     local fd=2
     local -i returncode
 
     case "$1" in
         inline)
-            command+=" -n"; pchars=" > "; pcolor="yellow"
-            ;;
-        message)
-            pchars=" . "; pcolor="white"
-            ;;
-        verbose)
-            pchars="[D]"; pcolor="blue"
-            ;;
-        success)
-            pchars="(*)"; pcolor="green"
-            ;;
-        warning)
-            pchars="[W]"; pcolor="yellow"
+            command+=" -n"
             ;;
         failure)
-            pchars="[E]"; pcolor="red"
             returncode=1
             ;;
         print)
             progname=""
             fd=1
             ;;
-        *)
-            pchars="[F]"; pcolor="red"
-            msg="Developer oops!  Usage: _msg MESSAGE_TYPE \"MESSAGE_CONTENT\""
-            returncode=127
-            ;;
+        # *)
+        #     pchars="[F]"; pcolor="red"
+        #     msg="Developer oops!  Usage: _msg MESSAGE_TYPE \"MESSAGE_CONTENT\""
+        #     returncode=127
+        #     ;;
     esac
 
     [[ -n $_MSG_FD_OVERRIDE ]] && fd=$_MSG_FD_OVERRIDE
@@ -754,24 +771,6 @@ check_onion_mirrors ()
     _success "Onion found in mirrors.txt file"
 }
 
-# get_onion_tortaxi fetches tortaxi data for the onion if available.
-get_onion_tortaxi ()
-{
-    local onion="${1}"
-
-    [[ ! -e "${RISQ_DIR}/tortaxi_sitenames" ]] && return
-
-    # - Grep a line with the name of the site
-    grep "${onion}" < "${RISQ_DIR}/tortaxi_sitenames" \
-        _info "No website data on Tor Taxi index"
-
-    # - Get the last part of this line, containing the corresponding URL path
-    # - Append path to tor.taxi onion
-    # - Fetch the corresponding mirrors.txt file
-    # - Grep everything between BEGIN_PGP_SIGNED_info and ENG_PGP_SIGNATURE
-    # - Compare with the one we have fetched on the site itself.
-}
-
 # src/lib/utils.sh
 
 # Return 0 if is set, 1 otherwise
@@ -884,11 +883,6 @@ risq_refresh_command() {
   # 1 - Blacklisted onion links
   _info "Fetching lists of onions to avoid"
   _info "- Tor Taxi..." && _run torify wget -O "${RISQ_DIR}/avoid/tortaxi" "${TOR_TAXI_ONION}/avoid"
-
-  # 2 - Save Tor taxi sitenames and URLs, and make a trimmed list
-  _info "Fetching Tor Taxi sitenames"
-  torbrowser "${TOR_TAXI_ONION}/sitenames"
-  mv ~/.tb/tor-browser/Browser/Downloads/tor-taxi\ Site\ Names.html "${RISQ_DIR}/tortaxi_sitenames"
 
 }
 
