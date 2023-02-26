@@ -51,6 +51,12 @@ commands:
       - long: --key
         short: -k
         help: "Optional public key file to import in keyring, to check the link against"
+      - long: --refresh
+        short: -r
+        help: "Run the risq refresh command to update blacklisted onion files and root keys"
+
+  - name: refresh
+    help: "Fetch some lists and indexes of root trust keys, links to avoid, etc"
 
   - name: help
     help: Show help about a command

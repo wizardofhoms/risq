@@ -1,7 +1,7 @@
 
 local command arguments
 
-command="${args[command]}"
+command="${args['command']}"
 arguments=( "${other_args[@]}" )
 
 case "${command}" in

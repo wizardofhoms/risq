@@ -14,7 +14,7 @@
 config_init() {
     RISQ_CONFIG_FILE=${RISQ_CONFIG_FILE-${RISQ_DIR}/config.ini}
     [[ -f "$RISQ_CONFIG_FILE" ]] || { 
-        _message "Writing default configuration file to ${RISQ_CONFIG_FILE}"
+        _info "Writing default configuration file to ${RISQ_CONFIG_FILE}"
 
     cat << EOF > "$RISQ_CONFIG_FILE" 
 ; RISKS AppVM (domU) Configuration file
@@ -32,7 +32,7 @@ GRAVEYARD=/home/user/.graveyard
 PASS_TIMEOUT=45
 
 ; Tor.taxi onion link is used as an additional source for verifying onion signatures.
-TOR_TAXI_ONION=http://tortaxi7axhn2fv4j475a6blv7vwjtpieokolfnojwvkhsnj7sgctkqd.onion
+TOR_TAXI_ONION=http://tortaxi2dev6xjwbaydqzla77rrnth7yn2oqzjfmiuwn5h6vsk2a4syd.onion
 
 ; DarketLive onion link is used as an additional source for verifying onion signatures.
 DARKNET_LIVE_ONION=http://darkzzx4avcsuofgfez5zq75cqc4mprjvfqywo45dfcaxrwqg6qrlfid.onion

@@ -32,3 +32,77 @@ get_url_host ()
     # Print the URL host string
     print "$host"
 }
+
+# onion_link_in_file returns 1 if the provided onion 
+# address is not found in the provided file path.
+onion_link_in_file ()
+{
+    local onion="${1}"
+    local file="${2}"
+
+    grep -G "${onion}" < "${file}"
+}
+
+# onion_is_blacklisted returns 0 if the provided onion
+# is found in one of our lists of links to avoid, and
+# logs a corresponding message to the user.
+onion_is_blacklisted ()
+{
+    local onion="${1}"
+
+    find "${RISQ_DIR}/avoid/"* -print0 | 
+    while IFS= read -r -d '' file; do 
+        grep -G "${onion}" < "$file" \
+            && _warning "Onion found in blacklist ${file} file !" && return
+    done
+
+    # The link is not blacklisted in our files.
+    return 1
+}
+
+# downloads the gpg.txt and mirrors.txt for a given onion link
+get_onion_auth_files ()
+{
+    local onion="${1}"
+
+    _info "Fetching GPG public keys, please wait..."
+    _run torify wget "${host}/pgp.txt"
+    [[ $? ]] || _warning "Failed to fetch onion/gpg.txt"
+
+    _info "Fetching signature file and ensuring URL match..."
+    _run torify wget "${host}/mirrors.txt"
+    [[ $? ]] || _warning "Failed to fetch onion/mirrors.txt"
+}
+
+# check_onion_mirrors fails and exits the program if the
+# onion target is not found in the website mirrors.txt.
+check_onion_mirrors ()
+{
+    local onion="${1}"
+    local tmp="${2}"
+
+    [[ ! -e "${tmp}/mirrors.txt" ]] && return
+
+    [[ ! $(onion_link_in_file "${onion}" "${tmp}/mirrors.txt") ]] \
+        && _failure "Target onion not found in mirrors.txt file"
+
+    _success "Onion found in mirrors.txt file"
+}
+
+# get_onion_tortaxi fetches tortaxi data for the onion if available.
+get_onion_tortaxi ()
+{
+    local onion="${1}"
+
+    [[ ! -e "${RISQ_DIR}/tortaxi_sitenames" ]] && return
+
+    # - Grep a line with the name of the site
+    grep "${onion}" < "${RISQ_DIR}/tortaxi_sitenames" \
+        _info "No website data on Tor Taxi index"
+
+    # - Get the last part of this line, containing the corresponding URL path
+    # - Append path to tor.taxi onion
+    # - Fetch the corresponding mirrors.txt file
+    # - Grep everything between BEGIN_PGP_SIGNED_info and ENG_PGP_SIGNATURE
+    # - Compare with the one we have fetched on the site itself.
+}

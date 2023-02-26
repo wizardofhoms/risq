@@ -21,7 +21,7 @@ _in_section ()
 ## Functions ##
 
 function is_verbose_set () {
-    if [[ "${args[--verbose]}" -eq 1 ]]; then
+    if [[ "${args['--verbose']}" -eq 1 ]]; then
         return 0
     else
         return 1
@@ -36,7 +36,7 @@ function _msg()
     if [[ ${#@} -lt 3 ]]; then
         local progname="$section"
         if [[ -z "$progname" ]]; then
-            progname='risks'
+            progname='risq'
         fi
         local msg="$2"
     else

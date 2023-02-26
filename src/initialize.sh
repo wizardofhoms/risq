@@ -27,7 +27,7 @@ fi
 typeset -rg RISQ_DIR="${HOME}/.risq"  
 
 # Create the risk directory if needed
-[[ -e $RISQ_DIR ]] || { mkdir -p $RISQ_DIR && _message "Creating RISKS directory in $RISQ_DIR" }
+[[ -e $RISQ_DIR ]] || { mkdir -p $RISQ_DIR && _info "Creating RISKS directory in $RISQ_DIR" }
 
 # Write the default configuration if it does not exist.
 config_init
@@ -36,4 +36,9 @@ config_init
 
 typeset -gr HUSH_DIR="$(config_get HUSH_DIR)"
 typeset -gr GRAVEYARD="$(config_get GRAVEYARD)"
-typeset -gH PASS_TIMEOUT=$(config_get PASS_TIMEOUT)
+typeset -gH PASS_TIMEOUT="$(config_get PASS_TIMEOUT)"
+
+# Other constants ----------------------------------------------------------------------------------
+
+typeset -gr TOR_TAXI_ONION="$(config_get TOR_TAXI_ONION)"
+typeset -gr DARKNET_LIVE_ONION="$(config_get DARKNET_LIVE_ONION)"
